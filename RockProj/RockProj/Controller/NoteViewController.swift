@@ -16,11 +16,14 @@ class NoteViewController: UIViewController {
 	
 	// MARK: Properties
 	var cells: [CellType] = [CellType]()
+	var selectedView: UITextView?
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
 		// Do any additional setup after loading the view, typically from a nib.
+			self.tableView.rowHeight = UITableView.automaticDimension
+			tableView.estimatedRowHeight = 30
 		self.tableView.delegate = self
 		self.cells.append(.text(text: ""))
 		
@@ -54,14 +57,23 @@ extension NoteViewController: UITableViewDataSource {
 		let item = cells[indexPath.row]
 		switch item {
 		case .text:
-			guard let cell = tableView.dequeueReusableCell(withIdentifier: "textCell") as? textCell else { return ParentCell ()}
+			guard let cell = tableView.dequeueReusableCell(withIdentifier: "textCell") as? TextCell else { return ParentCell ()}
 			cell.setup(asset: item)
 			cell.textField.delegate = self
+			cell.delegate = self
 			return cell
 		case .image:
-			guard let cell = tableView.dequeueReusableCell(withIdentifier: "imageCell") as? imageCell else { return ParentCell ()}
+			guard let cell = tableView.dequeueReusableCell(withIdentifier: "imageCell") as? ImageCell else { return ParentCell ()}
 			cell.setup(asset: item)
 			return cell
+			
+		}
+	}
+
+	
+	func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+		if let view = selectedView {
+			view.becomeFirstResponder()
 		}
 	}
 	
@@ -69,12 +81,21 @@ extension NoteViewController: UITableViewDataSource {
 
 extension NoteViewController: UITableViewDelegate {}
 
-// MARK: UITextViewDelegate Extension
-extension NoteViewController: UITextViewDelegate {
-	
-	func textViewDidChange(_ textView: UITextView) {
-		
-		
-		
+extension NoteViewController: NewLineDelegate {
+	func hasNewLine(view: UITextView) {
+		self.tableView.reloadData()
+		self.selectedView = view
 	}
+	
+	
+}
+
+
+extension NoteViewController: UITextViewDelegate {
+
+	func textViewDidChange(_ textView: UITextView) {
+		tableView.beginUpdates()
+		tableView.endUpdates()
+	}
+
 }

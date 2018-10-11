@@ -10,6 +10,14 @@ import Foundation
 import UIKit
 
 
+protocol NewLineDelegate {
+	func hasNewLine(view: UITextView)
+}
+
+/// Enum that defines cell type
+///
+/// - text: text in case is a text cell
+/// - image: iamge in case is a image cell
 enum CellType {
 	case text(text: String)
 	case image(image: UIImage)
@@ -24,12 +32,18 @@ class ParentCell: UITableViewCell {
 	
 }
 
-class textCell: ParentCell {
+class TextCell: ParentCell {
 	@IBOutlet var textField: UITextView!
+	var previousRect: CGRect = CGRect.zero
+	var delegate:NewLineDelegate?
 	
+	override func setup(asset: CellType) {
+		super.setup(asset: asset)
+	}
+
 }
 
-class imageCell: ParentCell {
+class ImageCell: ParentCell {
 	@IBOutlet var imageV: UIImageView!
 	
 	override func setup(asset: CellType) {
