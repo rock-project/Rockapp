@@ -15,7 +15,7 @@ class NoteViewController: UIViewController {
 	
 	
 	// MARK: Properties
-	var cells: [CellType] = [CellType]()
+	var cells: [CellInfo] = [CellInfo]()
 	var selectedView: UITextView?
 	
 	override func viewDidLoad() {
@@ -25,15 +25,15 @@ class NoteViewController: UIViewController {
 			self.tableView.rowHeight = UITableView.automaticDimension
 			tableView.estimatedRowHeight = 30
 		self.tableView.delegate = self
-		self.cells.append(.text(text: ""))
+		self.cells.append(CellInfo( text: ""))
 		
 	}
 
 	@IBAction func addAction(_ sender: Any) {
 		let alert = UIAlertController(title: "Adicionar", message: "", preferredStyle: .alert)
 		alert.addAction(UIAlertAction(title: "Adicionar imagem", style: .default, handler: { (_) in
-			self.cells.append(.image(image: TestConstants.TestNotes.imagem))
-			self.cells.append(.text(text: ""))
+			self.cells.append(CellInfo( image: TestConstants.TestNotes.imagem))
+			self.cells.append(CellInfo( text: ""))
 			self.tableView.reloadData()
 		}))
 		alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel, handler: nil))
@@ -55,16 +55,17 @@ extension NoteViewController: UITableViewDataSource {
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let item = cells[indexPath.row]
-		switch item {
+		switch item.type {
 		case .text:
 			guard let cell = tableView.dequeueReusableCell(withIdentifier: "textCell") as? TextCell else { return ParentCell ()}
-			cell.setup(asset: item)
-			cell.textField.delegate = self
+			
+			cell.setup(text: item.text!, index: indexPath.row)
+			
 			cell.delegate = self
 			return cell
 		case .image:
 			guard let cell = tableView.dequeueReusableCell(withIdentifier: "imageCell") as? ImageCell else { return ParentCell ()}
-			cell.setup(asset: item)
+			cell.setup(image: item.image!, index: indexPath.row)
 			return cell
 			
 		}
@@ -81,21 +82,24 @@ extension NoteViewController: UITableViewDataSource {
 
 extension NoteViewController: UITableViewDelegate {}
 
-extension NoteViewController: NewLineDelegate {
-	func hasNewLine(view: UITextView) {
-		self.tableView.reloadData()
-		self.selectedView = view
-	}
-	
-	
-}
-
-
-extension NoteViewController: UITextViewDelegate {
-
-	func textViewDidChange(_ textView: UITextView) {
+extension NoteViewController: TextViewUpdateDelegate {
+	func update(index: Int, text: String) {
+		let contentOffset = self.tableView.contentOffset
 		tableView.beginUpdates()
 		tableView.endUpdates()
+		self.tableView.layer.removeAllAnimations()
+		self.tableView.setContentOffset(contentOffset, animated: false)
+		self.tableView.scrollToBottom()
+		switch cells[index].type {
+		case .text:
+				cells[index].text = text
+			break
+		case .image:
+			break
+			
+		}
+		
 	}
-
+	
+	
 }

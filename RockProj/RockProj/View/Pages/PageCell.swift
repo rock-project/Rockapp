@@ -10,49 +10,56 @@ import Foundation
 import UIKit
 
 
-protocol NewLineDelegate {
-	func hasNewLine(view: UITextView)
+/// Delegate that is triggered whenever a textview has somethong typed inside of it
+protocol TextViewUpdateDelegate {
+	
+	/// Sends a signal to update the info in the main view
+	///
+	/// - Parameters:
+	///   - index: index of the information in the main view array
+	///   - text: new text of the table view
+	func update(index: Int, text: String)
 }
 
-/// Enum that defines cell type
-///
-/// - text: text in case is a text cell
-/// - image: iamge in case is a image cell
-enum CellType {
-	case text(text: String)
-	case image(image: UIImage)
-}
+
+
 
 class ParentCell: UITableViewCell {
-	var type:CellType!
-	
-	func setup(asset: CellType) {
-		self.type = asset
-	}
-	
+	var index: Int!
 }
 
+/// Cell that deals with text class
 class TextCell: ParentCell {
 	@IBOutlet var textField: UITextView!
 	var previousRect: CGRect = CGRect.zero
-	var delegate:NewLineDelegate?
+	var delegate:TextViewUpdateDelegate?
 	
-	override func setup(asset: CellType) {
-		super.setup(asset: asset)
+	func setup(text: String, index: Int) {
+		self.textField.text = text
+		self.textField.delegate = self
+		self.index = index
 	}
 
 }
 
+/// Cell that deals with images class
 class ImageCell: ParentCell {
 	@IBOutlet var imageV: UIImageView!
 	
-	override func setup(asset: CellType) {
-		super.setup(asset: asset)
-		switch asset {
-		case .image(let img):
-			self.imageV.image = img
-		default:
-			return
+	func setup(image: UIImage, index: Int) {
+		self.imageV.image = image
+		self.index = index
+		
+	}
+}
+
+
+// MARK: - Delegate for the textview in the TextCell
+extension TextCell: UITextViewDelegate {
+	func textViewDidChange(_ textView: UITextView) {
+		if let delegate = self.delegate {
+			delegate.update(index: self.index, text: textView.text)
+			
 		}
 	}
 }
