@@ -21,9 +21,6 @@ protocol TextViewUpdateDelegate {
 	func update(index: Int, text: String)
 }
 
-
-
-
 class ParentCell: UITableViewCell {
 	var index: Int!
 }
